@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía: Caja Fuera de Línea NCR</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #131929;
+    --surface2: #1a2235;
+    --border: #243050;
+    --accent: #00c2ff;
+    --accent2: #ff6b35;
+    --accent3: #00e5a0;
+    --warn: #ffb347;
+    --danger: #ff4d6d;
+    --text: #e8edf5;
+    --text-muted: #7a8ca8;
+    --gradient: linear-gradient(135deg, #00c2ff 0%, #00e5a0 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- INTRO SCREEN ---- */
+  #intro {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  #intro.hidden { opacity: 0; pointer-events: none; transform: scale(1.04); }
+
+  .intro-logo {
+    width: 90px; height: 90px;
+    background: var(--gradient);
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px;
+    margin-bottom: 28px;
+    box-shadow: 0 0 60px #00c2ff44;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ box-shadow: 0 0 40px #00c2ff44; }
+    50%{ box-shadow: 0 0 80px #00c2ff88; }
+  }
+
+  .intro-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .intro-title span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .intro-sub {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    text-align: center;
+    max-width: 420px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+
+  .badge-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 40px;
+  }
+  .badge {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: .8rem; font-weight: 500;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .badge.blue { border-color: #00c2ff44; color: var(--accent); background: #00c2ff11; }
+  .badge.green { border-color: #00e5a044; color: var(--accent3); background: #00e5a011; }
+  .badge.orange { border-color: #ff6b3544; color: var(--accent2); background: #ff6b3511; }
+
+  .btn-start {
+    padding: 16px 44px;
+    background: var(--gradient);
+    border: none; border-radius: 50px;
+    color: #0b0f1a; font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 700;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 4px 30px #00c2ff44;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 40px #00c2ff66; }
+
+  /* ---- MAIN APP ---- */
+  #app { display: none; }
+  #app.visible { display: block; }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-icon {
+    width: 40px; height: 40px;
+    background: var(--gradient);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .header-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+  .header-sub { font-size: .78rem; color: var(--text-muted); }
+
+  .progress-bar-wrap {
+    flex: 1; background: var(--surface2); border-radius: 10px; height: 8px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--gradient); border-radius: 10px;
+    transition: width .5s ease;
+  }
+  .progress-label { font-size: .78rem; color: var(--text-muted); white-space: nowrap; }
+
+  /* Navigation */
+  .section-nav {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 16px 24px; scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .section-nav::-webkit-scrollbar { display: none; }
+  .nav-pill {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500;
+    cursor: pointer; white-space: nowrap; transition: all .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-pill.active { background: var(--accent); border-color: var(--accent); color: #0b0f1a; }
+  .nav-pill.done { border-color: var(--accent3); color: var(--accent3); background: #00e5a011; }
+  .nav-pill .check { font-size: .9rem; }
+
+  /* Content area */
+  .content { max-width: 860px; margin: 0 auto; padding: 24px; }
+
+  /* Section header */
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    animation: fadeIn .4s ease;
+  }
+  .section-number {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: var(--gradient);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: #0b0f1a; flex-shrink: 0;
+  }
+  .section-title-text { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; }
+  .section-desc { font-size: .88rem; color: var(--text-muted); margin-top: 3px; }
+
+  /* Step card */
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    animation: slideUp .4s ease;
+    transition: border-color .3s;
+  }
+  .step-card.completed { border-color: var(--accent3); }
+  .step-card.active-card { border-color: var(--accent); box-shadow: 0 0 0 1px #00c2ff22; }
+
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes slideUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+
+  .step-top {
+    padding: 20px 24px;
+    cursor: pointer;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: background .2s;
+  }
+  .step-top:hover { background: var(--surface2); }
+
+  .step-num {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700;
+    color: var(--text-muted); flex-shrink: 0;
+    transition: all .3s;
+  }
+  .step-card.completed .step-num {
+    background: #00e5a022; border-color: var(--accent3); color: var(--accent3);
+  }
+  .step-card.active-card .step-num {
+    background: #00c2ff22; border-color: var(--accent); color: var(--accent);
+  }
+
+  .step-question {
+    font-family: 'Syne', sans-serif; font-size: 1.02rem; font-weight: 600;
+    line-height: 1.4; flex: 1;
+  }
+  .step-expand { color: var(--text-muted); font-size: 1.2rem; transition: transform .3s; }
+  .step-card.open .step-expand { transform: rotate(180deg); }
+
+  /* Expandable body */
+  .step-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height .4s ease;
+  }
+  .step-card.open .step-body { max-height: 800px; }
+
+  .step-body-inner { padding: 0 24px 24px 76px; }
+
+  .info-block {
+    padding: 14px 16px; border-radius: 12px; margin-bottom: 12px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .info-block.sub { background: #1a2235; border-left: 3px solid var(--accent); }
+  .info-block.tip { background: #1c1a12; border-left: 3px solid var(--warn); }
+  .info-block.ars { background: #121a1f; border-left: 3px solid var(--accent3); }
+
+  .info-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+  .info-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
+  .info-block.sub .info-label { color: var(--accent); }
+  .info-block.tip .info-label { color: var(--warn); }
+  .info-block.ars .info-label { color: var(--accent3); }
+  .info-text { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* Visual helper */
+  .visual-helper {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .visual-device { font-size: 3rem; margin-bottom: 8px; }
+  .visual-label { font-size: .8rem; color: var(--text-muted); }
+
+  /* Answer buttons */
+  .answer-row { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-yes, .btn-no, .btn-next {
+    flex: 1; padding: 12px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 500;
+    border: 1.5px solid; cursor: pointer; transition: all .2s;
+  }
+  .btn-yes { background: #00e5a022; border-color: var(--accent3); color: var(--accent3); }
+  .btn-yes:hover { background: #00e5a033; }
+  .btn-no { background: #ff4d6d22; border-color: var(--danger); color: var(--danger); }
+  .btn-no:hover { background: #ff4d6d33; }
+  .btn-next { background: #00c2ff22; border-color: var(--accent); color: var(--accent); }
+  .btn-next:hover { background: #00c2ff33; }
+
+  /* Result tag */
+  .result-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: .82rem; font-weight: 500; margin-top: 10px;
+  }
+  .result-tag.ok { background: #00e5a022; color: var(--accent3); border: 1px solid #00e5a044; }
+  .result-tag.fail { background: #ff4d6d22; color: var(--danger); border: 1px solid #ff4d6d44; }
+  .result-tag.warn { background: #ffb34722; color: var(--warn); border: 1px solid #ffb34744; }
+
+  /* Section bottom nav */
+  .section-controls {
+    display: flex; gap: 12px; justify-content: space-between;
+    margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+  }
+  .btn-nav {
+    padding: 12px 24px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: .92rem; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.primary { background: var(--gradient); border: none; color: #0b0f1a; font-weight: 600; }
+  .btn-nav.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px #00c2ff44; }
+
+  /* Final screen */
+  .final-screen {
+    text-align: center; padding: 60px 24px;
+    animation: fadeIn .6s ease;
+  }
+  .final-icon { font-size: 5rem; margin-bottom: 24px; }
+  .final-title {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .final-sub { color: var(--text-muted); max-width: 400px; margin: 0 auto 32px; line-height: 1.6; }
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px; max-width: 600px; margin: 0 auto 32px;
+  }
+  .summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px;
+    font-size: .88rem;
+  }
+  .summary-card .s-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .summary-card .s-label { color: var(--text-muted); margin-top: 4px; }
+
+  .btn-restart {
+    padding: 14px 36px; border-radius: 50px;
+    background: transparent; border: 1.5px solid var(--accent);
+    color: var(--accent); font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-restart:hover { background: #00c2ff22; }
+
+  /* Ticket box */
+  .ticket-box {
+    background: #1a1230; border: 1px solid #6c47ff44;
+    border-radius: 14px; padding: 16px 20px; margin-top: 14px;
+  }
+  .ticket-label { font-size: .75rem; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .ticket-text { font-size: .86rem; color: var(--text-muted); line-height: 1.6; }
+
+  .hidden { display: none !important; }
+
+  @media(max-width: 600px) {
+    .step-body-inner { padding: 0 16px 20px 16px; }
+    .answer-row { flex-direction: column; }
+    .section-controls { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-logo">🖥️</div>
+  <h1 class="intro-title">Caja NCR <span>Fuera de Línea</span></h1>
+  <p class="intro-sub">Guía paso a paso para revisar y solucionar una caja POS NCR con sistema ARS — sin necesidad de conocimientos técnicos.</p>
+  <div class="badge-row">
+    <span class="badge blue">Sistema NCR</span>
+    <span class="badge green">ARS / SUSE SP3</span>
+    <span class="badge orange">5 Secciones</span>
+  </div>
+  <button class="btn-start" onclick="startGuide()">▶ Iniciar Revisión</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-icon">🖥️</div>
+    <div>
+      <div class="header-title">Revisión Caja NCR</div>
+      <div class="header-sub" id="headerSub">Sección 1 de 5</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0%</div>
+  </div>
+
+  <div class="section-nav" id="sectionNav"></div>
+
+  <div class="content" id="mainContent"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const sections = [
+  {
+    id: 0,
+    title: "Energía y Hardware Básico",
+    icon: "⚡",
+    desc: "Verifica que el equipo tenga corriente y esté encendido correctamente",
+    steps: [
+      {
+        id: "e1",
+        q: "¿El equipo POS tiene luces encendidas o la pantalla muestra alguna imagen?",
+        sub: "Mira de frente del equipo: ¿hay algún LED encendido o la pantalla no está totalmente negra?",
+        tip: "Revisa que en la toma eléctrica haya corriente y que el cable de poder esté bien conectado atrás del equipo. Prueba con otro tomacorriente.",
+        ars: "En entorno ARS: si el equipo no enciende, no cargará el sistema operativo. No hay acción de sistema posible hasta resolver la energía.",
+        visual: "🔌",
+        visualLabel: "Revisa cables en la parte trasera del equipo",
+        ticketSi: null,
+        ticketNo: "Crea un ticket en Centro de Soluciones: 'Equipo POS sin energía, no enciende. Verificado cable y tomacorriente.'"
+      },
+      {
+        id: "e2",
+        q: "¿El cable de red está bien conectado atrás del equipo?",
+        sub: "El cable de red es similar al cable del teléfono pero más grueso. Debe estar insertado hasta escuchar un 'clic'. Las luces del puerto deben parpadear en verde y naranja.",
+        tip: "Desconecta y vuelve a conectar el cable de red hasta escuchar el 'clic'. Si la luz no parpadea, prueba con otro cable.",
+        ars: "En SUSE SP3: la caja entrará en red solo si se activa la conexión física y se detecta al inicio. Un cable suelto hace que el servicio de red no levante.",
+        visual: "🔗",
+        visualLabel: "Cable de red: conector RJ45 en puerto trasero del POS",
+        ticketSi: null,
+        ticketNo: "Crea un ticket en Centro de Soluciones: 'Puerto de red sin actividad, cable verificado, posible falla en cable o puerto.'"
+      }
+    ]
+  },
+  {
+    id: 1,
+    title: "Red e Internet en la Tienda",
+    icon: "🌐",
+    desc: "Comprueba si el problema es del POS o de toda la red de la tienda",
+    steps: [
+      {
+        id: "r1",
+        q: "¿Otros equipos de la tienda (otro POS, datáfono, computadores) tienen acceso a internet o aplicaciones?",
+        sub: "Prueba abrir www.eltiempo.com en un computador, o realiza un test de conectividad en cualquier datáfono y valida si da conexión exitosa o falla.",
+        tip: "Si ningún equipo tiene conexión, el problema es de la red general de la tienda, NO del POS.",
+        ars: "Si solo esta caja falla, se debe crear un ticket en Centro de Soluciones para validar en sitio.",
+        visual: "📡",
+        visualLabel: "Prueba con otro dispositivo de la misma tienda",
+        ticketSi: "Si SOLO esta caja falla: Crea ticket en Centro de Soluciones: 'Caja POS NCR sin red. Otros equipos conectados correctamente.'",
+        ticketNo: "Problema de red general: Crea ticket en Centro de Soluciones: 'Sin conectividad en toda la tienda. Afecta todos los dispositivos.'"
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Sistema Operativo (SUSE SP3)",
+    icon: "💻",
+    desc: "Verifica que el sistema operativo de la caja esté funcionando correctamente",
+    steps: [
+      {
+        id: "s1",
+        q: "¿La pantalla del POS muestra mensajes con letras rojas, advertencias o está congelada?",
+        sub: "Busca texto como 'error', 'failed', 'kernel panic', o si la pantalla está fija con un cursor parpadeante sin avanzar.",
+        tip: "Toma una foto clara del error y envíala al equipo de soporte técnico adjuntada en el ticket de Centro de Soluciones.",
+        ars: "Si la caja presenta un error o mensajes, comunícate con Mesas Especializadas para validar en línea con el número de ticket.",
+        visual: "⚠️",
+        visualLabel: "Fotografía la pantalla si aparece texto de error",
+        ticketSi: "Crea ticket en Centro de Soluciones: 'Error en sistema operativo. Adjunta foto del error visible en pantalla.' Llama a Mesas Especializadas.",
+        ticketNo: null
+      },
+      {
+        id: "s2",
+        q: "¿Ya intentaste apagar completamente el POS y volverlo a encender (reinicio completo)?",
+        sub: "Apaga usando el botón de poder, espera que la pantalla quede totalmente negra y espera 10 segundos antes de encender.",
+        tip: "Un reinicio limpio resuelve algunas fallas. Esta acción se debe realizar en conjunto con el equipo de Mesas Especializadas.",
+        ars: "El POS, una vez reiniciado, debe cargar de nuevo hasta la ventana de ingreso de cajero.",
+        visual: "🔄",
+        visualLabel: "Espera 10 segundos con el equipo apagado antes de reiniciar",
+        ticketSi: null,
+        ticketNo: "Realiza el reinicio en conjunto con Mesas Especializadas: comunícate antes de apagar el equipo."
+      },
+      {
+        id: "s3",
+        q: "¿La caja inicia correctamente y muestra la pantalla de ingreso del cajero?",
+        sub: "Deberías ver el menú de inicio de sesión o la pantalla principal para ingreso de cajero después de 4 a 6 minutos de haber encendido el equipo.",
+        tip: "Si después del arranque no aparece la pantalla de inicio de cajero, llama a Mesas Especializadas para revisión.",
+        ars: "Sistemas en falla de sistema operativo requieren revisión especializada.",
+        visual: "👤",
+        visualLabel: "Pantalla de inicio: debe mostrar campo para ingresar el usuario del cajero",
+        ticketSi: null,
+        ticketNo: "Crea ticket en Centro de Soluciones: 'POS no muestra pantalla de cajero tras reinicio. Tarda más de 6 minutos o queda en pantalla negra.' Llama a Mesas Especializadas."
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Periféricos del POS",
+    icon: "🖨️",
+    desc: "Verifica que los dispositivos conectados al POS estén funcionando",
+    steps: [
+      {
+        id: "p1",
+        q: "¿La impresora de la caja tiene papel, la tapa está bien cerrada y no muestra alarma en los LED?",
+        sub: "Abre la tapa de la impresora, verifica que haya rollo de papel y que salga por la ranura correcta. Cierra bien la tapa. Revisa si algún LED parpadea en rojo.",
+        tip: "Coloca un rollo nuevo y asegúrate de que el papel salga por la ranura frontal. Si la luz parpadea en rojo, revisa que no haya atasco de papel.",
+        ars: "Si la impresora no está encendida, la caja no iniciará y no aparecerá la pantalla de ingreso de cajero.",
+        visual: "🖨️",
+        visualLabel: "Revisa que el papel esté bien puesto y la tapa cerrada completamente",
+        ticketSi: null,
+        ticketNo: "Crea ticket en Centro de Soluciones: 'Impresora POS con alarma o sin papel, caja no inicia.' Llama a Mesas Especializadas."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Conexión al Servidor",
+    icon: "🔌",
+    desc: "Verifica la comunicación del POS con el servidor central NCR",
+    steps: [
+      {
+        id: "v1",
+        q: "¿En la esquina inferior de la pantalla de usuario aparece el nombre del servidor (normalmente 'SVR999')?",
+        sub: "Busca en la parte baja de la pantalla de ventas un texto pequeño con el nombre del servidor, como 'SVR999'.",
+        tip: "Si aparece 'Desconectado', 'Sin servidor' o no aparece nada, el POS no tiene comunicación con el servidor central. Reinicia el POS o valida el cable de red.",
+        ars: "La caja en modo 'standalone' o fuera de línea puede operar sin servidor, pero las transacciones no se sincronizan. Confirma con Mesas Especializadas hasta qué hora se subieron las transacciones.",
+        visual: "🖥️",
+        visualLabel: "Esquina inferior izquierda de la pantalla: busca el nombre del servidor",
+        ticketSi: null,
+        ticketNo: "Crea ticket en Centro de Soluciones: 'POS no muestra servidor SVR999. Caja posiblemente en modo standalone.' Confirma con Mesas Especializadas sincronización de transacciones."
+      },
+      {
+        id: "ip1",
+        q: "¿Conoces la dirección IP del POS? (ejemplo: 10.13X.XXX.XXX)",
+        sub: "Conecta un teclado de computadora en los puertos USB del POS. Oprime la tecla Windows para abrir una terminal. En SUSE SP3 escribe: ip a — y busca el número en formato 10.13X.XXX.XXX junto al texto 'inet'.",
+        tip: "La IP del POS es clave para que el soporte técnico NCR pueda hacer diagnóstico remoto. Siempre ten este dato a la mano antes de llamar.",
+        ars: "Sin la IP no es posible que soporte realice conexión remota al equipo para diagnóstico.",
+        visual: "🔢",
+        visualLabel: "Anota la IP: formato 10.13X.XXX.XXX — la necesitarás para el soporte",
+        ticketSi: "¡Perfecto! Anota la IP. Inclúyela en el ticket: 'IP del POS: [escribe aquí la IP]'.",
+        ticketNo: "Sigue estos pasos: conecta teclado USB → presiona tecla Windows → escribe 'ip a' → busca el número que empiece con 10.13"
+      }
+    ]
+  }
+];
+
+// ===== STATE =====
+let currentSection = 0;
+let stepStates = {}; // {stepId: 'yes'|'no'|'open'|null}
+let sectionDone = new Array(sections.length).fill(false);
+
+// ===== INIT =====
+function startGuide() {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  renderNav();
+  renderSection(0);
+}
+
+function renderNav() {
+  const nav = document.getElementById('sectionNav');
+  nav.innerHTML = sections.map((s, i) => `
+    <button class="nav-pill ${i === currentSection ? 'active' : ''} ${sectionDone[i] ? 'done' : ''}"
+      onclick="gotoSection(${i})">
+      ${sectionDone[i] ? '<span class="check">✓</span>' : s.icon} ${s.title}
+    </button>
+  `).join('');
+}
+
+function gotoSection(idx) {
+  currentSection = idx;
+  renderNav();
+  renderSection(idx);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderSection(idx) {
+  const sec = sections[idx];
+  const totalSteps = sections.reduce((a, s) => a + s.steps.length, 0);
+  const doneSteps = Object.keys(stepStates).length;
+  const pct = Math.round((doneSteps / totalSteps) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '%';
+  document.getElementById('headerSub').textContent = `Sección ${idx + 1} de ${sections.length}`;
+
+  const c = document.getElementById('mainContent');
+  c.innerHTML = `
+    <div class="section-header">
+      <div class="section-number">${sec.icon}</div>
+      <div>
+        <div class="section-title-text">${sec.title}</div>
+        <div class="section-desc">${sec.desc}</div>
+      </div>
+    </div>
+    ${sec.steps.map((step, si) => renderStep(step, si + 1, sec.steps.length)).join('')}
+    <div class="section-controls">
+      ${idx > 0 ? `<button class="btn-nav" onclick="gotoSection(${idx-1})">← Sección anterior</button>` : '<div></div>'}
+      ${idx < sections.length - 1
+        ? `<button class="btn-nav primary" onclick="completeSection(${idx})">Sección siguiente →</button>`
+        : `<button class="btn-nav primary" onclick="showFinal()">✅ Finalizar revisión</button>`
+      }
+    </div>
+  `;
+}
+
+function renderStep(step, num, total) {
+  const state = stepStates[step.id];
+  const isOpen = state === 'open' || !state;
+  const isDone = state === 'yes' || state === 'no';
+  const isYes = state === 'yes';
+  const isNo = state === 'no';
+
+  return `
+    <div class="step-card ${isDone ? 'completed' : ''} ${isOpen && !isDone ? 'active-card' : ''} ${isOpen ? 'open' : ''}" id="card-${step.id}">
+      <div class="step-top" onclick="toggleStep('${step.id}')">
+        <div class="step-num">${isDone ? '✓' : num}</div>
+        <div class="step-question">${step.q}</div>
+        <div class="step-expand">▼</div>
+      </div>
+      <div class="step-body">
+        <div class="step-body-inner">
+          <div class="visual-helper">
+            <div class="visual-device">${step.visual}</div>
+            <div class="visual-label">${step.visualLabel}</div>
+          </div>
+          <div class="info-block sub">
+            <div class="info-icon">🔍</div>
+            <div>
+              <div class="info-label">¿Qué debo revisar?</div>
+              <div class="info-text">${step.sub}</div>
+            </div>
+          </div>
+          <div class="info-block tip">
+            <div class="info-icon">💡</div>
+            <div>
+              <div class="info-label">Consejo práctico</div>
+              <div class="info-text">${step.tip}</div>
+            </div>
+          </div>
+          <div class="info-block ars">
+            <div class="info-icon">⚙️</div>
+            <div>
+              <div class="info-label">Contexto del sistema ARS</div>
+              <div class="info-text">${step.ars}</div>
+            </div>
+          </div>
+          ${isDone ? `
+            <div class="result-tag ${isYes ? 'ok' : 'fail'}">
+              ${isYes ? '✅ Respondiste: SÍ — paso verificado' : '❌ Respondiste: NO — requiere atención'}
+            </div>
+            ${isNo && step.ticketNo ? `<div class="ticket-box"><div class="ticket-label">🎫 Acción requerida</div><div class="ticket-text">${step.ticketNo}</div></div>` : ''}
+            ${isYes && step.ticketSi ? `<div class="ticket-box"><div class="ticket-label">📋 Nota</div><div class="ticket-text">${step.ticketSi}</div></div>` : ''}
+            <button class="btn-next" style="margin-top:12px;width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--accent);background:#00c2ff11;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;" onclick="resetStep('${step.id}')">↩ Cambiar respuesta</button>
+          ` : `
+            <div class="answer-row">
+              <button class="btn-yes" onclick="answerStep('${step.id}', 'yes')">✅ SÍ, funciona</button>
+              <button class="btn-no" onclick="answerStep('${step.id}', 'no')">❌ NO / No sé</button>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleStep(id) {
+  if (stepStates[id] === 'yes' || stepStates[id] === 'no') return;
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('open');
+}
+
+function answerStep(id, answer) {
+  stepStates[id] = answer;
+  // Re-render current section
+  renderSection(currentSection);
+  // Scroll to next card or bottom
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.step-card:not(.completed)');
+    if (cards.length > 0) cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function resetStep(id) {
+  delete stepStates[id];
+  renderSection(currentSection);
+}
+
+function completeSection(idx) {
+  sectionDone[idx] = true;
+  currentSection = idx + 1;
+  renderNav();
+  renderSection(idx + 1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showFinal() {
+  sectionDone[currentSection] = true;
+  const totalSteps = sections.reduce((a, s) => a + s.steps.length, 0);
+  const yesCount = Object.values(stepStates).filter(v => v === 'yes').length;
+  const noCount = Object.values(stepStates).filter(v => v === 'no').length;
+  const unanswered = totalSteps - yesCount - noCount;
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="final-screen">
+      <div class="final-icon">🎉</div>
+      <div class="final-title">Revisión Completada</div>
+      <p class="final-sub">Has finalizado el diagnóstico de la caja NCR. Aquí un resumen de los resultados:</p>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="s-num">${totalSteps}</div>
+          <div class="s-label">Pasos totales</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-num" style="background: linear-gradient(135deg,#00e5a0,#00c2ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${yesCount}</div>
+          <div class="s-label">Verificados ✅</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-num" style="background: linear-gradient(135deg,#ff4d6d,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${noCount}</div>
+          <div class="s-label">Con falla ❌</div>
+        </div>
+        <div class="summary-card">
+          <div class="s-num" style="background: linear-gradient(135deg,#ffb347,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${unanswered}</div>
+          <div class="s-label">Sin responder ⏳</div>
+        </div>
+      </div>
+      ${noCount > 0 ? `
+        <div class="ticket-box" style="max-width:500px;margin:0 auto 24px;">
+          <div class="ticket-label">📋 Próximos pasos</div>
+          <div class="ticket-text">Tienes <strong style="color:#ff4d6d">${noCount} punto(s) con falla</strong>. Revisa los pasos marcados con ❌ para los tickets y acciones recomendadas. Contacta a <strong>Centro de Soluciones</strong> o <strong>Mesas Especializadas</strong> según el caso.</div>
+        </div>
+      ` : `
+        <div class="ticket-box" style="max-width:500px;margin:0 auto 24px;background:#0f2018;border-color:#00e5a044;">
+          <div class="ticket-label" style="color:#00e5a0">✅ Todo verificado</div>
+          <div class="ticket-text">¡Excelente! Todos los puntos verificados están en orden. Si la caja sigue sin funcionar, contacta a <strong>Mesas Especializadas</strong> con esta información.</div>
+        </div>
+      `}
+      <button class="btn-restart" onclick="restartGuide()">🔄 Iniciar nueva revisión</button>
+    </div>
+  `;
+}
+
+function restartGuide() {
+  stepStates = {};
+  sectionDone = new Array(sections.length).fill(false);
+  currentSection = 0;
+  renderNav();
+  renderSection(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
